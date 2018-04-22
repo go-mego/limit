@@ -38,15 +38,24 @@ func main() {
 	m := mego.New()
 	// 將大小限制器用於全域中介軟體時，
 	// 會強制要求所有路由的請求大小必須低於這個指定的 KB 大小。
-	m.Use(size.Limiter(size.Option{
+	m.Use(size.Limiter(&size.Options{
 		// 允許的最大請求大小。
 		Limit: 3 * size.MB,
 	}))
+	m.Run()
+}
+```
+
+大小限制器同時也能夠用在單一路由上。
+
+```go
+func main() {
+	m := mego.New()
 	// 大小限制器同時也能夠只用在單一個路由上，這能夠讓不同路由有著不同的大小限制。
-	m.Post("/", size.Limiter(size.Option{
-		Limit: 3 * size.MB,
-	}), func() string {
-		return "Hello, world!"
+	m.POST("/", size.Limiter(&size.Options{
+		// ...
+	}), func() {
+		// ...
 	})
 	m.Run()
 }
@@ -70,18 +79,26 @@ func main() {
 	m := mego.New()
 	// 將流量限制器用於全域中介軟體時，
 	// 會強制單個客戶端在所有路由請求時，不得在指定時間內大於一定的請求量。
-	m.Use(rate.Limiter(rate.Option{
+	m.Use(rate.Limiter(&rate.Options{
 		// 逾期週期，過了這段時間會重設限制。
 		Period: 1 * time.Hour,
 		// 週期內所允許的最大的請求次數。
 		Limit: 100,
 	}))
+	m.Run()
+}
+```
+
+配額限制器同時也能夠用在單一路由上。
+
+```go
+func main() {
+	m := mego.New()
 	// 流量限制器同時也能夠套用在單一路由上，這讓你能夠在不同路由有著不同的限制。
-	m.Get("/", rate.Limiter(rate.Option{
-		Period: 1 * time.Hour,
-		Limit:  100,
-	}), func() string {
-		return "Hello, world!"
+	m.GET("/", rate.Limiter(&rate.Options{
+		// ...
+	}), func() {
+		// ...
 	})
 	m.Run()
 }
@@ -103,20 +120,28 @@ func main() {
 	m := mego.New()
 	// 將請求限制器用於全域中介軟體時，
 	// 會強制要求所有路由的請求同時數必須低於這個數字。
-	m.Use(request.Limiter(request.Option{
+	m.Use(request.Limiter(&request.Options{
 		// 最大的同時連線數。
 		Limit: 100,
 	}))
-	// 請求限制器同時也能夠只用在單一個路由上，這能夠讓不同路由有著不同的同時請求數限制。
-	m.Get("/", request.Limiter(request.Option{
-		Limit: 100,
-	}), func() string {
-		return "Hello, world!"
-	})
 	m.Run()
 }
 ```
 
+請求限制器同時也能夠用在單一路由上。
+
+```go
+func main() {
+	m := mego.New()
+	// 請求限制器同時也能夠只用在單一個路由上，這能夠讓不同路由有著不同的同時請求數限制。
+	m.GET("/", request.Limiter(&request.Options{
+		// ...
+	}), func() {
+		// ...
+	})
+	m.Run()
+}
+```
 
 
 
